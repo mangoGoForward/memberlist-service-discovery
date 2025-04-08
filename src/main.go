@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"io"
+	"memberlist-service-discovery/src/discovery"
 	"net"
 	"os"
 	"time"
-
-	"memberlist-service-discovery/src/discovery"
 )
 
 func getK8sPodAddresses(serviceName string) ([]string, error) {
@@ -30,21 +29,22 @@ func main() {
 	memberlistConfig := discovery.DefaultConfig(nodeName)
 	memberlistConfig.BindAddr = os.Getenv("POD_IP")
 	memberlistConfig.BindPort = 6789
+	memberlistConfig.LogOutput = io.Discard
 
 	service, err := discovery.NewMemberlistService(memberlistConfig)
 	if err != nil {
-		log.Fatalf("初始化 Memberlist 失败: %v", err)
+		//log.Fatalf("初始化 Memberlist 失败: %v", err)
 	}
 	defer service.Shutdown()
 
 	// 动态获取 Kubernetes Pod 地址
 	existingNodes, err := getK8sPodAddresses(fmt.Sprintf("%s.svc.cluster.local", os.Getenv("SERVICE_NAME")))
 	if err != nil {
-		log.Printf("无法获取现有服务地址: %v", err)
+		//log.Printf("无法获取现有服务地址: %v", err)
 	} else if len(existingNodes) > 0 {
 		err = service.Join(existingNodes)
 		if err != nil {
-			log.Printf("服务注册失败: %v", err)
+			//log.Printf("服务注册失败: %v", err)
 		}
 	}
 

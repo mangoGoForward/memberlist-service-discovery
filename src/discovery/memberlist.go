@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -57,6 +58,9 @@ func (m *MemberlistService) NotifyJoin(node *memberlist.Node) {
 	defer m.mu.Unlock()
 	m.members[node.Name] = node.Address()
 	log.Printf("服务注册: %s (%s)", node.Name, node.Address())
+	for nodeName, member := range m.members {
+		fmt.Printf("服务名：%s, 服务地址：%s\n", nodeName, member)
+	}
 }
 
 // NotifyLeave 处理节点离开事件
@@ -65,6 +69,9 @@ func (m *MemberlistService) NotifyLeave(node *memberlist.Node) {
 	defer m.mu.Unlock()
 	delete(m.members, node.Name)
 	log.Printf("服务离开: %s (%s)", node.Name, node.Address())
+	for nodeName, member := range m.members {
+		fmt.Printf("服务名：%s, 服务地址：%s\n", nodeName, member)
+	}
 }
 
 // NotifyUpdate 处理节点更新事件
@@ -77,6 +84,6 @@ func DefaultConfig(nodeName string) *memberlist.Config {
 	config := memberlist.DefaultLANConfig()
 	config.Name = nodeName
 	config.BindPort = 6789
-	config.Logger = log.Default()
+	//config.Logger = log.Default()
 	return config
 }
